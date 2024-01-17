@@ -4,7 +4,10 @@ package edu.uw.basickotlin
 fun whenFn(arg: Any): String {
     when (arg) {
         is String -> {
-            return if (arg == "Hello") "world" else "Say what?"
+            when (arg) {
+                "Hello" -> return "world"
+                else -> return "Say what?"
+            }
         }
         is Int -> {
             when (arg) {
@@ -28,41 +31,44 @@ fun sub(lhs: Int, rhs: Int): Int = lhs - rhs
 fun mathOp(lhs: Int, rhs: Int, op: (Int, Int) -> Int) = op(lhs, rhs)
 
 // write a class "Person" with first name, last name and age
-class Person(var firstName: String, var lastName: String, var age: Int)
-{
-    // Forget equals() and hashcode() for now
 
+class Person(var firstName: String, var lastName: String, var age: Int) {
     val debugString : String
         get() = "[Person firstName:${this.firstName} lastName:${this.lastName} age:${this.age}]"
 }
 
 // write a class "Money"
-class Money(val amount: Int, val currency: String)
-{
+class Money(val amount: Int, val currency: String) {
     init {
-        if (amount < 0)
-            throw IllegalArgumentException("Illegal amount, cannot be negative")
-        if (currency !in listOf("USD", "GBP", "CAN", "EUR"))
-            throw IllegalArgumentException("Unrecognized currency")
+        if (amount < 0) {
+            throw IllegalArgumentException("Ammount cannot be negative")
+        }
+        if (currency !in listOf("USD", "GBP", "CAN", "EUR")) {
+            throw IllegalArgumentException("Invalid currency")
+        }
     }
+
     fun convert(otherCurr: String): Money {
-        if (otherCurr !in listOf("USD", "GBP", "CAN", "EUR"))
-            throw IllegalArgumentException("Unrecognized currency")
-
-        return if (this.currency == otherCurr) {
-            Money(this.amount, otherCurr)
+        if (otherCurr !in listOf("USD", "GBP", "CAN", "EUR")) {
+            throw IllegalArgumentException("Invalid currency")
         }
-        else when (Pair(currency, otherCurr)) {
-            Pair("USD", "GBP") -> Money((this.amount * .5).toInt(), "GBP")
-            Pair("USD", "EUR") -> Money((this.amount * 1.5).toInt(), "EUR")
-            Pair("USD", "CAN") -> Money((this.amount * 1.25).toInt(), "CAN")
-            Pair("GBP", "USD") -> Money((this.amount * 2).toInt(), "USD")
-            Pair("EUR", "USD") -> Money((this.amount * .75).toInt(), "USD")
-            Pair("CAN", "USD") -> Money((this.amount * 5 / 4).toInt(), "USD")
-            else -> convert("USD").convert(otherCurr)
+
+        if (this.currency == otherCurr) {
+            return Money(this.amount, otherCurr)
+        } else {
+            when (Pair(currency, otherCurr)) {
+                Pair("USD", "GBP") -> return Money((this.amount * 0.5).toInt(), "GBP")
+                Pair("USD", "EUR") -> return Money((this.amount * 1.5).toInt(), "EUR")
+                Pair("USD", "CAN") -> return Money((this.amount * 1.25).toInt(), "CAN")
+                Pair("GBP", "USD") -> return Money((this.amount * 2).toInt(), "USD")
+                Pair("EUR", "USD") -> return Money((this.amount * .75).toInt(), "USD")
+                Pair("CAN", "USD") -> return Money((this.amount * 5 / 4).toInt(), "USD")
+                else -> return convert("USD").convert(otherCurr)
+            }
         }
     }
 
-    operator fun plus(other: Money): Money =
-        Money(this.amount + (other.convert(this.currency)).amount, this.currency)
+    operator fun plus(other: Money): Money {
+        return Money(this.amount + (other.convert(this.currency)).amount, this.currency)
+    }
 }
